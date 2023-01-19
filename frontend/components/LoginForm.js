@@ -1,33 +1,33 @@
 import React, { useState } from 'react'
 import PT from 'prop-types'
+import { axiosWithAuth } from '../axios'
+
 
 const initialFormValues = {
   username: '',
   password: '',
 }
+
 export default function LoginForm(props) {
   const [values, setValues] = useState(initialFormValues)
   // ✨ where are my props? Destructure them here
-
+const {login } = props
   const onChange = evt => {
     const { id, value } = evt.target
     setValues({ ...values, [id]: value })
+    console.log(values)
   }
+
+
 
   const onSubmit = evt => {
     evt.preventDefault()
-    // ✨ implement
-  }
-
-  const isDisabled = () => {
-    // ✨ implement
-    // Trimmed username must be >= 3, and
-    // trimmed password must be >= 8 for
-    // the button to become enabled
+    login(values.username, values.password)
+    setValues(initialFormValues)
   }
 
   return (
-    <form id="loginForm" onSubmit={onSubmit}>
+    <form id="loginForm" >
       <h2>Login</h2>
       <input
         maxLength={20}
@@ -43,7 +43,13 @@ export default function LoginForm(props) {
         placeholder="Enter password"
         id="password"
       />
-      <button disabled={isDisabled()} id="submitCredentials">Submit credentials</button>
+      <button disabled={values.username.trim().length >= 3 && values.password.length >= 8 ? false : true} 
+      id="submitCredentials"
+      onClick={onSubmit}
+      >
+      Submit credentials
+      </button>
+
     </form>
   )
 }

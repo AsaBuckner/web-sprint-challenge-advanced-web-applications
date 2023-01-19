@@ -5,6 +5,8 @@ import LoginForm from './LoginForm'
 import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
+import axios from 'axios'
+import { useEffect } from 'react'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
@@ -18,25 +20,45 @@ export default function App() {
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
-  const redirectToLogin = () => { /* ✨ implement */ }
-  const redirectToArticles = () => { /* ✨ implement */ }
-
+  const redirectToLogin = () => { 
+    if(!localStorage.token){
+    navigate(loginUrl)}
+   }
+   const redirectToArticles = () => { 
+    navigate('/article')
+  }
   const logout = () => {
-    // ✨ implement
-    // If a token is in local storage it should be removed,
-    // and a message saying "Goodbye!" should be set in its proper state.
-    // In any case, we should redirect the browser back to the login screen,
-    // using the helper above.
+    localStorage.removeItem('token');
+    setMessage('Goodbye!');
+    redirectToLogin();
   }
 
   const login = ({ username, password }) => {
     // ✨ implement
+
     // We should flush the message state, turn on the spinner
-    // and launch a request to the proper endpoint.
-    // On success, we should set the token to local storage in a 'token' key,
-    // put the server success message in its proper state, and redirect
-    // to the Articles screen. Don't forget to turn off the spinner!
-  }
+    setMessage('')
+    setSpinnerOn(true)
+     // and launch a request to the proper endpoint.
+    axios.post(`http://localhost:9000/api/login`,({ 'username': username, 'password': password}))
+    .then(res=>{
+      
+       // On success, we should set the token to local storage in a 'token' key,
+      localStorage.setItem('token',res.data.token)
+       // put the server success message in its proper state, and redirect
+      setMessage(res.data.message)
+      // to the Articles screen. Don't forget to turn off the spinner!
+      setSpinnerOn(false)
+      redirectToArticles()
+      console.log(message)
+      console.log(localStorage.token)
+    })
+    .catch(err=> {
+      console.log(err)
+      setSpinnerOn(false)
+      setMessage(err.response.data.message)
+    })
+    }
 
   const getArticles = () => {
     // ✨ implement
@@ -62,14 +84,20 @@ export default function App() {
   }
 
   const deleteArticle = article_id => {
-    // ✨ implement
+    axios.delete( `http://localhost:9000/api/articles/${article_id}`)
   }
+
+  useEffect(()=>{
+    
+ },[])
+
+
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
-      <Spinner />
-      <Message />
+      <Spinner on={spinnerOn}/>
+      <Message message={message}/>
       <button id="logout" onClick={logout}>Logout from app</button>
       <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
         <h1>Advanced Web Applications</h1>
@@ -78,11 +106,11 @@ export default function App() {
           <NavLink id="articlesScreen" to="/articles">Articles</NavLink>
         </nav>
         <Routes>
-          <Route path="/" element={<LoginForm />} />
+          <Route path="/" element={<LoginForm login={login}/>} />
           <Route path="articles" element={
             <>
-              <ArticleForm />
-              <Articles />
+              <ArticleForm postArticle={postArticle} updateArticle={updateArticle} setCurrentArticleId={setCurrentArticleId}/>
+              <Articles articles={articles} deleteArticle={deleteArticle} getArticles={getArticles} setCurrentArticleId={setCurrentArticleId}/>
             </>
           } />
         </Routes>
