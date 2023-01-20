@@ -1,35 +1,49 @@
 import React, { useEffect, useState } from 'react'
 import PT from 'prop-types'
+import { axiosWithAuth } from '../axios'
 
 const initialFormValues = { title: '', text: '', topic: '' }
 
 export default function ArticleForm(props) {
   const [values, setValues] = useState(initialFormValues)
   // ✨ where are my props? Destructure them here
-
+  const {postArticle, updateArticle, currentArticleId, setCurrentArticleId } = props
+  
   useEffect(() => {
     // ✨ implement
+
+    if(currentArticleId){
+      setValues(currentArticleId)}
+    
+    
     // Every time the `currentArticle` prop changes, we should check it for truthiness:
     // if it's truthy, we should set its title, text and topic into the corresponding
     // values of the form. If it's not, we should reset the form back to initial values.
-  })
+  }, [currentArticleId])
 
   const onChange = evt => {
     const { id, value } = evt.target
+    console.log(values)
     setValues({ ...values, [id]: value })
   }
 
   const onSubmit = evt => {
     evt.preventDefault()
-    // ✨ implement
+    // ✨ implement    
     // We must submit a new post or update an existing one,
     // depending on the truthyness of the `currentArticle` prop.
+    if(!currentArticleId){
+      postArticle(values)
+      setValues(initialFormValues)}
+    else{
+      console.log(currentArticleId)
+      updateArticle(currentArticleId.article_id, values)
+      setValues(initialFormValues)
+      setCurrentArticleId('')
+    }
+
   }
 
-  const isDisabled = () => {
-    // ✨ implement
-    // Make sure the inputs have some values
-  }
 
   return (
     // ✨ fix the JSX: make the heading display either "Edit" or "Create"

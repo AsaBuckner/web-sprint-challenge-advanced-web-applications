@@ -22,7 +22,7 @@ const {login } = props
 
   const onSubmit = evt => {
     evt.preventDefault()
-    login(values.username, values.password)
+    login(values)
     setValues(initialFormValues)
   }
 
